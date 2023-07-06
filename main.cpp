@@ -7,18 +7,70 @@
 
 using namespace std;
 
-vector<double> input_numbers(size_t count) {
-    vector<double> result(count);
-    for (size_t i = 0; i < count; i++) {
-        cin >> result[i];
+size_t find_max_count(const vector<size_t>& bins, const size_t bin_count) {
+    size_t max_count = 0;
+    for (size_t count : bins) {
+        if (count > max_count) {
+            max_count = count;
+        }
     }
-    return result;
+    return max_count;
 }
 
-void find_minmax(vector<double> numbers, double& min, double& max) {
-    min = numbers[0];
-    max = numbers[0];
-    for (double x : numbers) {
+void show_histogram_text(const vector<size_t>bons, size_t bin_count, double min, double max) {
+
+    size_t segment, len_segment, max_len = 0;
+
+    double bin_size = round((static_cast<double>(max - min) / bin_count) * 100.0) / 100.0;
+
+    for (double j = min; j < max; j += bin_size) {
+        segment = static_cast<size_t>(j * 100);
+        while (segment % 10 == 0)
+            segment = segment / 10;
+        len_segment = to_string(segment).length();
+        if (j != segment)
+            len_segment++;
+        if (len_segment > max_len)
+            max_len = len_segment;
+    }
+
+    double scaling_factor = 1;
+    size_t height;
+    const size_t screen = 76;
+    double val_size = min;
+    string sp(max_len, ' ');
+
+    size_t max_count = find_max_count(bons, bin_count);
+
+    if (max_count > screen)
+        scaling_factor = screen / static_cast<double>(max_count);
+    for (int i = 0; i < bin_count; i++) {
+        if (bons[i] < 100) {
+            cout << ' ';
+        }
+        if (bons[i] < 10) {
+            cout << ' ';
+        }
+
+        cout << sp << bons[i] << '|';
+
+        height = static_cast<int>(scaling_factor * bons[i]);
+        for (int j = 0; j < height; j++)
+            cout << '*';
+        cout << '\n';
+        val_size = val_size + bin_size;
+
+        if (i < (bin_count - 1)) {
+            cout << val_size << endl;
+        }
+    }
+
+}
+
+void find_minmax(const vector<double>dogi, double& min, double& max) {
+    min = dogi[0];
+    max = dogi[0];
+    for (double x : dogi) {
         if (x < min) {
             min = x;
         }
@@ -28,96 +80,67 @@ void find_minmax(vector<double> numbers, double& min, double& max) {
     }
 }
 
-void show_histogram_text(vector<size_t> bins, double min_val, double bin_size) {
-    double scaling_factor = 1;
-    size_t height;
-    double val_size = min_val;
-    size_t max_count = 0;
-    string sp(max_count, ' ');
-
-    if (max_count > 76) {
-        scaling_factor = 76 / static_cast<double>(max_count);
+vector<double> create_mass(size_t number_count) {
+    vector<double> dogi(number_count);
+    dogi.resize(number_count);
+    cerr << "¬ведите числа: ";
+    for (int i = 0; i < number_count; i++) {
+        cin >> dogi[i];
     }
-
-    for (int i = 0; i < bins.size(); i++) {
-        if (bins[i] < 100) {
-            cout << ' ';
-        }
-        if (bins[i] < 10) {
-            cout << ' ';
-        }
-
-        cout << sp << bins[i] << '|';
-
-        height = static_cast<int>(scaling_factor * bins[i]);
-        for (int j = 0; j < height; j++)
-            cout << '*';
-        cout << '\n';
-        val_size = val_size + bin_size;
-
-        if (i < (bins.size() - 1)) {
-            cout << val_size << endl;
-        }
-
-        if (bins[i] > max_count) {
-            max_count = bins[i];
-        }
-    }
+    return dogi;
 }
 
-void make_histogram(vector<double> numbers, size_t bin_count) {
-    vector<size_t> bins(bin_count);
+vector<size_t> make_hist(const vector<double>& dogi, size_t bin_count, size_t number_count, double& min, double& max) {
 
-    double min_val, max_val;
-    find_minmax(numbers, min_val, max_val);
-
-    double bin_size = round((max_val - min_val) / bin_count * 100.0) / 100.0;
-
-    size_t segment;
+    vector<size_t> bons(bin_count);
 
     size_t max_count = 0;
 
-    for (size_t i = 0; i < numbers.size(); i++) {
+    double bin_size = round((static_cast<double>(max - min) / bin_count) * 100.0) / 100.0;
+
+    for (size_t i = 0; i < number_count; i++) {
         bool found = false;
         size_t j;
-
         for (j = 0; (j < bin_count - 1) && !found; j++) {
-            auto lo = min_val + j * bin_size;
-            auto hi = min_val + (j + 1) * bin_size;
-
-            if ((lo <= numbers[i]) && (numbers[i] < hi)) {
-                bins[j]++;
+            auto lo = min + j * bin_size;
+            auto hi = min + (j + 1) * bin_size;
+            if ((lo <= dogi[i]) && (dogi[i] < hi)) {
+                bons[j]++;
                 found = true;
+                if (bons[j] > max_count)
+                    max_count = bons[j];
             }
         }
-
         if (!found) {
-            bins[bin_count - 1]++;
-        }
-
-        if (bins[j] > max_count) {
-            max_count = bins[j];
+            bons[bin_count - 1]++;
+            if (bons[bin_count - 1] > max_count)
+                max_count = bons[bin_count - 1];
         }
     }
 
-    show_histogram_text(bins, min_val, bin_size);
+    return bons;
+
 }
 
-
-int main() {
+int main()
+{
     setlocale(LC_ALL, "Russian");
 
     size_t number_count, bin_count;
+    double min = 0, max = 0;
 
     cerr << "¬ведите кол-во чисел: ";
     cin >> number_count;
 
-    cerr << "¬ведите числа: ";
-    const auto numbers = input_numbers(number_count);
+    const auto dogi = create_mass(number_count);
+
+    find_minmax(dogi, min, max);
 
     cerr << "¬ведите кол-во корзин: ";
     cin >> bin_count;
     cerr << '\n';
 
-    make_histogram(numbers, bin_count);
+    const auto bins = make_hist(dogi, bin_count, number_count, min, max);
+
+    show_histogram_text(bins, bin_count, min, max);
 }
