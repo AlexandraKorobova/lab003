@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1688680075 source:c:\users\Александра\desktop\lab003\lab003\a.cpp
+	"test.h"
+	<vector>
+
+1688680043 c:\users\Александра\desktop\lab003\lab003\test.h
+	<vector>
+
